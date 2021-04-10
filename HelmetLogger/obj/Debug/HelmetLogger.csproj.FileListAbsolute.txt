@@ -1,0 +1,9 @@
+C:\Users\Dani\source\repos\HelmetLogger\bin\Debug\HelmetLogger.dll
+C:\Users\Dani\source\repos\HelmetLogger\bin\Debug\HelmetLogger.pdb
+C:\Users\Dani\source\repos\HelmetLogger\bin\Debug\RagePluginHookSDK.dll
+C:\Users\Dani\source\repos\HelmetLogger\bin\Debug\RagePluginHookSDK.xml
+C:\Users\Dani\source\repos\HelmetLogger\obj\Debug\HelmetLogger.csprojAssemblyReference.cache
+C:\Users\Dani\source\repos\HelmetLogger\obj\Debug\HelmetLogger.csproj.CoreCompileInputs.cache
+C:\Users\Dani\source\repos\HelmetLogger\obj\Debug\HelmetLogger.csproj.CopyComplete
+C:\Users\Dani\source\repos\HelmetLogger\obj\Debug\HelmetLogger.dll
+C:\Users\Dani\source\repos\HelmetLogger\obj\Debug\HelmetLogger.pdb
