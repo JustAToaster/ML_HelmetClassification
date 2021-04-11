@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Rage;
 using Rage.Native;
 using System.Windows.Forms;
+using System.Drawing;
 
 [assembly: Rage.Attributes.Plugin("Helmet Logger", Description = "Logs coordinates of peds with helmets.", Author = "Dani")]
 
@@ -18,6 +19,100 @@ namespace HelmetLogger
         private static Vector3 MultiplyVector3(Vector3 vec1, Vector3 vec2)
         {
             return new Vector3(vec1.X * vec2.X, vec1.Y * vec2.Y, vec1.Z * vec2.Z);
+        }
+        private static Vector2 DivideVector2(Vector2 vec1, Vector2 vec2)
+        {
+            return new Vector2(vec1.X / vec2.X, vec1.Y / vec2.Y);
+        }
+
+        private static bool InBounds(Vector2 vec1, Vector2 vec2)
+        {
+            return ((vec1.X >= 0 && vec1.X <= 1) && (vec1.Y >= 0 && vec1.Y <= 1) && (vec2.X >= 0 && vec2.X <= 1) && (vec2.Y >= 0 && vec2.Y <= 1));
+        }
+
+        private static bool HasHelmet(Ped ped)
+        {
+            //Get its model hash to recognize the character
+            uint ped_hash = ped.Model.Hash;
+            //Get prop index: it returns -1 if it has no helmet/hat
+            int prop_index = NativeFunction.Natives.GET_PED_PROP_INDEX<int>(ped, 0);
+            if(prop_index == -1)
+            {
+                return false;
+            }
+            //We need to check for every possible character that can wear a protection helmet
+            //If it just returns true, any hat the character wears is a protection helmet
+            switch (ped_hash)
+            {
+                //Casey
+                case 0xEA969C40:
+                    return true;
+                //CS Dave Norton
+                case 0x8587248C:
+                    return true;
+                //CS Jimmy Di Santo
+                case 0xB8CC92B4:
+                    return true;
+                //CS Nervous Ron
+                case 0x7896DA94:
+                    if (prop_index == 1) return true;
+                    else return false;
+                //CS Wade
+                case 0xD266D9D6:
+                    return true;
+                //HC Driver (exclude for now, he wears bike helmets)
+                //case 0x3B474ADF:
+                //    if (prop_index >= 2) return true;
+                //    else return false;
+                //HC Gunman
+                case 0xB881AEE:
+                    if (prop_index == 1 || prop_index == 5) return true;
+                    else return false;
+                //IG Dave Norton
+                case 0x15CD4C33:
+                    return true;
+                //IG Jimmy Di Santo
+                case 0x570462B9:
+                    return true;
+                //IG Lamar Davis (exclude for now, he wears bike helmets)
+                //case 0x65B93076:
+                //    if (prop_index == 1) return true;
+                //    else return false;
+                //IG Nervous Ron
+                case 0xBD006AF1:
+                    if (prop_index == 1) return true;
+                    else return false;
+                //IG Wade
+                case 0x92991B72:
+                    return true;
+                //MP F Freemode 1
+                case 0x9C9EFFD8:
+                    if (prop_index == 16 || prop_index == 17 || prop_index == 18) return true;
+                    else return false;
+                //MP M Freemode 1
+                case 0x705E61F2:
+                    if (prop_index == 17) return true;
+                    else return false;
+                //MP M S Armoured 1
+                case 0xCDEF5408:
+                    if (prop_index == 1) return true;
+                    else return false;
+                //Player One (Franklin)
+                case 0x9B22DBAF:
+                    if (prop_index == 5 || prop_index == 7) return true;
+                    else return false;
+                //Player Two (Trevor)
+                case 0x9B810FA2:
+                    if (prop_index == 0 || prop_index == 4 || prop_index == 5 || prop_index == 6 || prop_index == 9 || prop_index == 11 || prop_index == 24) return true;
+                    else return false;
+                //Player Zero (Michael)
+                case 0xD7114C9:
+                    if (prop_index == 0 || prop_index == 4 || prop_index == 5 || prop_index == 26) return true;
+                    else return false;
+                default:
+                    return false;
+            }
+            return false;
         }
 
         public static void Main()
@@ -32,31 +127,35 @@ namespace HelmetLogger
                 if (Game.IsKeyDown(Keys.PrintScreen))
                 {
                     Vector3 player_pos = Game.LocalPlayer.Character.Position;
+                    Vector2 res = new Vector2((float)Game.Resolution.Width, (float)Game.Resolution.Height);
                     num_peds = 0;
+                    num_helmets = 0;
                     writer = new StreamWriter("C:\\GTAV_helmet_data\\im" + num_screenshots + ".txt", true, Encoding.ASCII);
                     Ped[] peds = World.GetAllPeds();
                     Rage.Object[] objects = World.GetAllObjects();
-                    Vector3 obj_pos3D, obj_dim3D;
-                    Vector2 obj_pos2D, obj_dim2D;
+                    Vector3 face_pos3D, face_dim3D;
+                    Vector2 face_pos2D, face_dim2D;
                     Vector2[] bbox_corners = new Vector2[8];
                     Vector3[] bbox_map = { new Vector3(1, 1, 1), new Vector3(-1, 1, 1), new Vector3(1, -1, 1), new Vector3(1, 1, -1), new Vector3(-1, -1, 1), new Vector3(1, -1, -1), new Vector3(-1,1,-1), new Vector3(-1,-1,-1)};
                     Vector2 min_corner = new Vector2(0, 0);
                     Vector2 max_corner = new Vector2(0, 0);
-                    num_helmets = 0;
-                    foreach (Rage.Object obj in objects)
-                    {
-                        //Compute 2D bounding box based on width, height and length in 3D space
-                        if (obj.Model.GetHashCode() == -537490919 || obj.Model.GetHashCode() == -246563715 && obj.IsVisible && obj.IsRendered && obj.IsOnScreen)
+                    foreach (Ped ped in peds)
+                    {   
+                        float ped_distance = ped.DistanceTo(player_pos);
+                        isClose = ped_distance <= 12;
+                        if(ped.IsRendered && ped.IsVisible && ped.IsOnScreen && ped.IsHuman && isClose)
                         {
-                            num_helmets++;
-                            //Get position (center of the 3D bounding box)
-                            obj_pos3D = obj.Position;
-                            obj_pos2D = World.ConvertWorldPositionToScreenPosition(obj_pos3D);
-                            obj_dim3D = obj.Model.Dimensions/2;
+                            num_peds++;
+                            //Game.LogTrivial("Distance: " + ped_distance);
+                            Vector2 ped_position = World.ConvertWorldPositionToScreenPosition(ped.Position);
+                            //Get position of face (center of the 3D bounding box)
+                            face_pos3D = ped.GetBonePosition(PedBoneId.Head);
+                            face_pos2D = DivideVector2(World.ConvertWorldPositionToScreenPosition(face_pos3D), res);
+                            face_dim3D = new Vector3(0.15f, 0.15f, 0.2f); //Overestimation of the dimensions of a head with an helmet
                             //Compute the 2D coordinates of the 3D bounding box corners, then take the min and max component to find the 2D bounding box
-                            for(int i=0; i<7; ++i)
+                            for (int i = 0; i < 7; ++i)
                             {
-                                bbox_corners[i] = World.ConvertWorldPositionToScreenPosition(obj_pos3D + MultiplyVector3(bbox_map[i], obj_dim3D));
+                                bbox_corners[i] = DivideVector2(World.ConvertWorldPositionToScreenPosition(face_pos3D + MultiplyVector3(bbox_map[i], face_dim3D)), res);
                                 if (i == 0)
                                 {
                                     min_corner = max_corner = bbox_corners[i];
@@ -68,78 +167,25 @@ namespace HelmetLogger
                                 }
                             }
                             //Compute 2D bounding box width and height
-                            obj_dim2D = new Vector2(max_corner.X - min_corner.X, max_corner.Y - min_corner.Y);
-                            writer.WriteLine("Helmet at (" + obj_pos2D.X + "," + obj_pos2D.Y + ") with size " + obj_dim2D.X + " x " + obj_dim2D.Y);
-                            Game.LogTrivial("Helmet at (" + obj_pos2D.X + "," + obj_pos2D.Y + ") with size " + obj_dim2D.X + " x " + obj_dim2D.Y);
-
-                        }
-                    }
-                    foreach (Ped ped in peds)
-                    {   
-                        float ped_distance = ped.DistanceTo(player_pos);
-                        isClose = ped_distance <= 20;
-                        if(ped.IsRendered && ped.IsVisible && ped.IsOnScreen && isClose)
-                        {
-                            num_peds++;
-                            Game.LogTrivial("Distance: " + ped_distance);
-                            Vector2 ped_position = World.ConvertWorldPositionToScreenPosition(ped.Position);
-                            if (ped.IsWearingHelmet)
+                            face_dim2D = new Vector2(max_corner.X - min_corner.X, max_corner.Y - min_corner.Y);
+                            if (InBounds(face_pos2D, face_dim2D))
                             {
-                                writer.WriteLine("Pedestrian " + num_peds + " with helmet at (" + ped_position.X + "," + ped_position.Y + ")");
-                                Game.LogTrivial("Pedestrian " + num_peds + " with helmet at (" + ped_position.X + "," + ped_position.Y + ")");
+                                if (HasHelmet(ped))
+                                {
+                                    writer.WriteLine("1 " + face_pos2D.X + " " + face_pos2D.Y + " " + face_dim2D.X + " " + face_dim2D.Y);
+                                    num_helmets++;
+                                }
+                                else
+                                {
+                                    writer.WriteLine("0 " + face_pos2D.X + " " + face_pos2D.Y + " " + face_dim2D.X + " " + face_dim2D.Y);
+                                }
                             }
-                            else
-                            {
-                                writer.WriteLine("Pedestrian " + num_peds + " without helmet at (" + ped_position.X + "," + ped_position.Y + ")");
-                                Game.LogTrivial("Pedestrian " + num_peds + " without helmet at (" + ped_position.X + "," + ped_position.Y + ")");
-                            }
+                            else Game.LogTrivial("Pedestrian found out of image bounds");
                         }
                     }
                     num_screenshots++;
                     Game.LogTrivial("Pedestrians found " + num_peds + ", helmets found " + num_helmets);
                     writer.Close();
-                }
-                if (Game.IsKeyDown(Keys.F12))
-                {
-                    writer = new StreamWriter("C:\\GTAV_helmet_data\\objects.txt", true, Encoding.ASCII);
-                    Rage.Object[] objects = World.GetAllObjects();
-                    Vector3 obj_pos3D, obj_dim3D;
-                    Vector2 obj_pos2D, obj_dim2D;
-                    Vector2[] bbox_corners = new Vector2[8];
-                    Vector3[] bbox_map = { new Vector3(1, 1, 1), new Vector3(-1, 1, 1), new Vector3(1, -1, 1), new Vector3(1, 1, -1), new Vector3(-1, -1, 1), new Vector3(1, -1, -1), new Vector3(-1, 1, -1), new Vector3(-1, -1, -1) };
-                    Vector2 min_corner = new Vector2(0, 0);
-                    Vector2 max_corner = new Vector2(0, 0);
-                    foreach (Rage.Object obj in objects)
-                    {
-                        //Compute 2D bounding box based on width, height and length in 3D space
-                        if (obj.IsVisible && obj.IsRendered && obj.IsOnScreen)
-                        {
-                            //Get position (center of the 3D bounding box)
-                            obj_pos3D = obj.Position;
-                            obj_pos2D = World.ConvertWorldPositionToScreenPosition(obj_pos3D);
-                            obj_dim3D = obj.Model.Dimensions / 2;
-                            //Compute the 2D coordinates of the 3D bounding box corners, then take the min and max component to find the 2D bounding box
-                            for (int i = 0; i < 7; ++i)
-                            {
-                                bbox_corners[i] = World.ConvertWorldPositionToScreenPosition(obj_pos3D + MultiplyVector3(bbox_map[i], obj_dim3D));
-                                if (i == 0)
-                                {
-                                    min_corner = max_corner = bbox_corners[i];
-                                }
-                                else
-                                {
-                                    min_corner = Vector2.Minimize(bbox_corners[i], min_corner);
-                                    max_corner = Vector2.Maximize(bbox_corners[i], max_corner);
-                                }
-                            }
-                            //Compute 2D bounding box width and height
-                            obj_dim2D = new Vector2(max_corner.X - min_corner.X, max_corner.Y - min_corner.Y);
-                            writer.WriteLine("Object " + obj.Model.GetHashCode() + " " + obj.Model.Name + " at (" + obj_pos2D.X + "," + obj_pos2D.Y + ") with size " + obj_dim2D.X + " x " + obj_dim2D.Y);
-                            Game.LogTrivial("Object " + obj.Model.GetHashCode() + " " + obj.Model.Name + " at (" + obj_pos2D.X + "," + obj_pos2D.Y + ") with size " + obj_dim2D.X + " x " + obj_dim2D.Y);
-
-                        }
-                    }
-
                 }
                 if (Game.IsKeyDown(Keys.NumPad0))
                 {
