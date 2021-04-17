@@ -34,7 +34,7 @@ namespace HelmetLogger
         {
             //Get its model hash to recognize the character
             uint ped_hash = ped.Model.Hash;
-            //Get prop index: it returns -1 if it has no helmet/hat
+            //Get prop index (drawable ID): it returns -1 if it has no helmet/hat
             int prop_index = NativeFunction.Natives.GET_PED_PROP_INDEX<int>(ped, 0);
             if(prop_index == -1)
             {
@@ -46,12 +46,15 @@ namespace HelmetLogger
             {
                 //Casey
                 case 0xEA969C40:
+                    //Helmet is at drawableID 0
                     return true;
                 //CS Dave Norton
                 case 0x8587248C:
+                    //Helmet is at drawableID 0
                     return true;
                 //CS Jimmy Di Santo
                 case 0xB8CC92B4:
+                    //Helmet is at drawableID 0
                     return true;
                 //CS Nervous Ron
                 case 0x7896DA94:
@@ -59,6 +62,7 @@ namespace HelmetLogger
                     else return false;
                 //CS Wade
                 case 0xD266D9D6:
+                    //Helmet is at drawableID 0
                     return true;
                 //HC Driver (exclude for now, he wears bike helmets)
                 //case 0x3B474ADF:
@@ -70,9 +74,11 @@ namespace HelmetLogger
                     else return false;
                 //IG Dave Norton
                 case 0x15CD4C33:
+                    //Helmet is at drawableID 0
                     return true;
                 //IG Jimmy Di Santo
                 case 0x570462B9:
+                    //Helmet is at drawableID 0
                     return true;
                 //IG Lamar Davis (exclude for now, he wears bike helmets)
                 //case 0x65B93076:
@@ -84,6 +90,7 @@ namespace HelmetLogger
                     else return false;
                 //IG Wade
                 case 0x92991B72:
+                    //Helmet is at drawableID 0
                     return true;
                 //MP F Freemode 1
                 case 0x9C9EFFD8:
@@ -131,10 +138,11 @@ namespace HelmetLogger
                     num_peds = 0;
                     num_helmets = 0;
                     writer = new StreamWriter("C:\\GTAV_helmet_data\\im" + num_screenshots + ".txt", true, Encoding.ASCII);
+                    writer.NewLine = "\n";
                     Ped[] peds = World.GetAllPeds();
                     Rage.Object[] objects = World.GetAllObjects();
-                    Vector3 face_pos3D, face_dim3D;
-                    Vector2 face_pos2D, face_dim2D;
+                    Vector3 head_pos3D, head_dim3D;
+                    Vector2 head_pos2D, head_dim2D;
                     Vector2[] bbox_corners = new Vector2[8];
                     Vector3[] bbox_map = { new Vector3(1, 1, 1), new Vector3(-1, 1, 1), new Vector3(1, -1, 1), new Vector3(1, 1, -1), new Vector3(-1, -1, 1), new Vector3(1, -1, -1), new Vector3(-1,1,-1), new Vector3(-1,-1,-1)};
                     Vector2 min_corner = new Vector2(0, 0);
@@ -149,13 +157,13 @@ namespace HelmetLogger
                             //Game.LogTrivial("Distance: " + ped_distance);
                             Vector2 ped_position = World.ConvertWorldPositionToScreenPosition(ped.Position);
                             //Get position of face (center of the 3D bounding box)
-                            face_pos3D = ped.GetBonePosition(PedBoneId.Head);
-                            face_pos2D = DivideVector2(World.ConvertWorldPositionToScreenPosition(face_pos3D), res);
-                            face_dim3D = new Vector3(0.15f, 0.15f, 0.2f); //Overestimation of the dimensions of a head with an helmet
+                            head_pos3D = ped.GetBonePosition(PedBoneId.Head);
+                            head_pos2D = DivideVector2(World.ConvertWorldPositionToScreenPosition(head_pos3D), res);
+                            head_dim3D = new Vector3(0.15f, 0.15f, 0.2f); //Overestimation of the dimensions of a head with an helmet
                             //Compute the 2D coordinates of the 3D bounding box corners, then take the min and max component to find the 2D bounding box
                             for (int i = 0; i < 7; ++i)
                             {
-                                bbox_corners[i] = DivideVector2(World.ConvertWorldPositionToScreenPosition(face_pos3D + MultiplyVector3(bbox_map[i], face_dim3D)), res);
+                                bbox_corners[i] = DivideVector2(World.ConvertWorldPositionToScreenPosition(head_pos3D + MultiplyVector3(bbox_map[i], head_dim3D)), res);
                                 if (i == 0)
                                 {
                                     min_corner = max_corner = bbox_corners[i];
@@ -167,17 +175,17 @@ namespace HelmetLogger
                                 }
                             }
                             //Compute 2D bounding box width and height
-                            face_dim2D = new Vector2(max_corner.X - min_corner.X, max_corner.Y - min_corner.Y);
-                            if (InBounds(face_pos2D, face_dim2D))
+                            head_dim2D = new Vector2(max_corner.X - min_corner.X, max_corner.Y - min_corner.Y);
+                            if (InBounds(head_pos2D, head_dim2D))
                             {
                                 if (HasHelmet(ped))
                                 {
-                                    writer.WriteLine("1 " + face_pos2D.X + " " + face_pos2D.Y + " " + face_dim2D.X + " " + face_dim2D.Y);
+                                    writer.WriteLine("1 " + head_pos2D.X + " " + head_pos2D.Y + " " + head_dim2D.X + " " + head_dim2D.Y);
                                     num_helmets++;
                                 }
                                 else
                                 {
-                                    writer.WriteLine("0 " + face_pos2D.X + " " + face_pos2D.Y + " " + face_dim2D.X + " " + face_dim2D.Y);
+                                    writer.WriteLine("0 " + head_pos2D.X + " " + head_pos2D.Y + " " + head_dim2D.X + " " + head_dim2D.Y);
                                 }
                             }
                             else Game.LogTrivial("Pedestrian found out of image bounds");
@@ -186,105 +194,6 @@ namespace HelmetLogger
                     num_screenshots++;
                     Game.LogTrivial("Pedestrians found " + num_peds + ", helmets found " + num_helmets);
                     writer.Close();
-                }
-                if (Game.IsKeyDown(Keys.NumPad0))
-                {
-                    Ped[] peds = World.GetAllPeds();
-                    foreach (Ped ped in peds)
-                    {
-                        if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen)
-                        {
-                            ped.GiveHelmet(false, HelmetTypes.FiremanHelmet, 0);                           
-                        }
-                    }
-                }
-                if (Game.IsKeyDown(Keys.NumPad1))
-                {
-                    Ped[] peds = World.GetAllPeds();
-                    foreach (Ped ped in peds)
-                    {
-                        if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen)
-                        {
-                            ped.GiveHelmet(false, HelmetTypes.FiremanHelmet, 1);
-                        }
-                    }
-                }
-                if (Game.IsKeyDown(Keys.NumPad2))
-                {
-                    Ped[] peds = World.GetAllPeds();
-                    foreach (Ped ped in peds)
-                    {
-                        if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen)
-                        {
-                            ped.GiveHelmet(false, HelmetTypes.FiremanHelmet, 2);
-                        }
-                    }
-                }
-                if (Game.IsKeyDown(Keys.NumPad3))
-                {
-                    Ped[] peds = World.GetAllPeds();
-                    foreach (Ped ped in peds)
-                    {
-                        if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen)
-                        {
-                            ped.GiveHelmet(false, HelmetTypes.FiremanHelmet, 3);
-                        }
-                    }
-                }
-                if (Game.IsKeyDown(Keys.NumPad4))
-                {
-                    Ped[] peds = World.GetAllPeds();
-                    foreach (Ped ped in peds)
-                    {
-                        if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen)
-                        {
-                            ped.GiveHelmet(false, HelmetTypes.PilotHeadset, 0);
-                        }
-                    }
-                }
-                if (Game.IsKeyDown(Keys.NumPad5))
-                {
-                    Ped[] peds = World.GetAllPeds();
-                    foreach (Ped ped in peds)
-                    {
-                        if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen)
-                        {
-                            ped.GiveHelmet(false, HelmetTypes.PilotHelmet, 0);
-                        }
-                    }
-                }
-                if (Game.IsKeyDown(Keys.NumPad6))
-                {
-                    Ped[] peds = World.GetAllPeds();
-                    foreach (Ped ped in peds)
-                    {
-                        if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen)
-                        {
-                            ped.GiveHelmet(false, HelmetTypes.PoliceMotorcycleHelmet, 0);
-                        }
-                    }
-                }
-                if (Game.IsKeyDown(Keys.NumPad7))
-                {
-                    Ped[] peds = World.GetAllPeds();
-                    foreach (Ped ped in peds)
-                    {
-                        if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen)
-                        {
-                            ped.GiveHelmet(false, HelmetTypes.RegularMotorcycleHelmet, 0);
-                        }
-                    }
-                }
-                if (Game.IsKeyDown(Keys.NumPad9))
-                {
-                    Ped[] peds = World.GetAllPeds();
-                    foreach (Ped ped in peds)
-                    {
-                        if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen)
-                        {
-                            ped.RemoveHelmet(true);
-                        }
-                    }
                 }
                 Rage.GameFiber.Yield();
             }
