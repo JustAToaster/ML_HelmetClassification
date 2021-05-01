@@ -33,88 +33,40 @@ namespace HelmetLogger
         private static bool HasHelmet(Ped ped)
         {
             //Get its model hash to recognize the character
-            uint ped_hash = ped.Model.Hash;
+            String ped_name = ped.Model.Name;
             //Get prop index (drawable ID): it returns -1 if it has no helmet/hat
             int prop_index = NativeFunction.Natives.GET_PED_PROP_INDEX<int>(ped, 0);
-            if(prop_index == -1)
+            if (prop_index == -1)
             {
                 return false;
             }
             //We need to check for every possible character that can wear a protection helmet
             //If it just returns true, any hat the character wears is a protection helmet
-            switch (ped_hash)
+            switch (ped_name)
             {
-                //Casey
-                case 0xEA969C40:
-                    //Helmet is at drawableID 0
-                    return true;
-                //CS Dave Norton
-                case 0x8587248C:
-                    //Helmet is at drawableID 0
-                    return true;
-                //CS Jimmy Di Santo
-                case 0xB8CC92B4:
-                    //Helmet is at drawableID 0
-                    return true;
-                //CS Nervous Ron
-                case 0x7896DA94:
-                    if (prop_index == 1) return true;
+                case "G_M_M_CHEMWORK_01":
+                case "S_M_Y_FIREMAN_01":
+                case "U_M_M_FIBARCHITECT":
+                case "PLAYER_ZERO":
+                    if (prop_index == 0) return true;
                     else return false;
-                //CS Wade
-                case 0xD266D9D6:
-                    //Helmet is at drawableID 0
-                    return true;
-                //HC Driver (exclude for now, he wears bike helmets)
-                //case 0x3B474ADF:
-                //    if (prop_index >= 2) return true;
-                //    else return false;
-                //HC Gunman
-                case 0xB881AEE:
-                    if (prop_index == 1 || prop_index == 5) return true;
-                    else return false;
-                //IG Dave Norton
-                case 0x15CD4C33:
-                    //Helmet is at drawableID 0
-                    return true;
-                //IG Jimmy Di Santo
-                case 0x570462B9:
-                    //Helmet is at drawableID 0
-                    return true;
-                //IG Lamar Davis (exclude for now, he wears bike helmets)
-                //case 0x65B93076:
-                //    if (prop_index == 1) return true;
-                //    else return false;
-                //IG Nervous Ron
-                case 0xBD006AF1:
-                    if (prop_index == 1) return true;
-                    else return false;
-                //IG Wade
-                case 0x92991B72:
-                    //Helmet is at drawableID 0
-                    return true;
-                //MP F Freemode 1
-                case 0x9C9EFFD8:
-                    if (prop_index == 16 || prop_index == 17 || prop_index == 18) return true;
-                    else return false;
-                //MP M Freemode 1
-                case 0x705E61F2:
-                    if (prop_index == 17) return true;
-                    else return false;
-                //MP M S Armoured 1
-                case 0xCDEF5408:
-                    if (prop_index == 1) return true;
-                    else return false;
-                //Player One (Franklin)
-                case 0x9B22DBAF:
+                case "PLAYER_ONE":
                     if (prop_index == 5 || prop_index == 7) return true;
                     else return false;
-                //Player Two (Trevor)
-                case 0x9B810FA2:
-                    if (prop_index == 0 || prop_index == 4 || prop_index == 5 || prop_index == 6 || prop_index == 9 || prop_index == 11 || prop_index == 24) return true;
+                case "PLAYER_TWO":
+                    if (prop_index == 0 || prop_index == 4) return true;
                     else return false;
-                //Player Zero (Michael)
-                case 0xD7114C9:
-                    if (prop_index == 0 || prop_index == 4 || prop_index == 5 || prop_index == 26) return true;
+                case "S_M_Y_CONSTRUCT_01":
+                    if (prop_index == 1 || prop_index == 2) return true;
+                    else return false;
+                case "S_M_Y_CONSTRUCT_02":
+                    if (prop_index == 0 || prop_index == 1) return true;
+                    else return false;
+                case "S_M_Y_DOCKWORK_01":
+                    if (prop_index == 1 || prop_index == 3) return true;
+                    else return false;
+                case "S_M_M_DOCKWORK_01":
+                    if (prop_index == 0 || prop_index == 2) return true;
                     else return false;
                 default:
                     return false;
