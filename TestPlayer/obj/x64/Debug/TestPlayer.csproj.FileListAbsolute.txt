@@ -1,0 +1,9 @@
+C:\Users\Pier\source\repos\TestPlayer\TestPlayer\bin\x64\Debug\TestPlayer.dll
+C:\Users\Pier\source\repos\TestPlayer\TestPlayer\bin\x64\Debug\TestPlayer.pdb
+C:\Users\Pier\source\repos\TestPlayer\TestPlayer\bin\x64\Debug\RagePluginHookSDK.dll
+C:\Users\Pier\source\repos\TestPlayer\TestPlayer\bin\x64\Debug\RagePluginHookSDK.xml
+C:\Users\Pier\source\repos\TestPlayer\TestPlayer\obj\x64\Debug\TestPlayer.csproj.CoreCompileInputs.cache
+C:\Users\Pier\source\repos\TestPlayer\TestPlayer\obj\x64\Debug\TestPlayer.csproj.CopyComplete
+C:\Users\Pier\source\repos\TestPlayer\TestPlayer\obj\x64\Debug\TestPlayer.dll
+C:\Users\Pier\source\repos\TestPlayer\TestPlayer\obj\x64\Debug\TestPlayer.pdb
+C:\Users\Pier\source\repos\TestPlayer\TestPlayer\obj\x64\Debug\TestPlayer.csprojAssemblyReference.cache
