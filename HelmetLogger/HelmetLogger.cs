@@ -30,6 +30,44 @@ namespace HelmetLogger
             return ((vec1.X >= 0 && vec1.X <= 1) && (vec1.Y >= 0 && vec1.Y <= 1) && (vec2.X >= 0 && vec2.X <= 1) && (vec2.Y >= 0 && vec2.Y <= 1));
         }
 
+        //Check for occlusion by tracing a ray to 27 points uniformly distributed around the head center
+        private static bool isHeadNotOccluded(Ped ped, Vector3 camera_pos, Vector3 head_pos)
+        {
+            float pos_shift = 0.04f;
+            Vector3[] shift_map = { 
+                new Vector3(pos_shift, pos_shift, pos_shift), 
+                new Vector3(pos_shift, pos_shift, 0), 
+                new Vector3(pos_shift, 0, pos_shift), 
+                new Vector3(0, pos_shift, pos_shift), 
+                new Vector3(0, 0, pos_shift), 
+                new Vector3(0, pos_shift, 0),
+                new Vector3(pos_shift, 0, 0),
+                new Vector3(-pos_shift, pos_shift, pos_shift),
+                new Vector3(-pos_shift, -pos_shift, pos_shift),
+                new Vector3(-pos_shift, pos_shift, -pos_shift),
+                new Vector3(pos_shift, -pos_shift, 0),
+                new Vector3(-pos_shift, 0, pos_shift),
+                new Vector3(0, pos_shift, -pos_shift)
+            };
+            Vector3[] head_points = new Vector3[27];
+            for(int i=0; i<13; ++i)
+            {
+                head_points[i << 1] = head_pos + shift_map[i];
+                head_points[i << 1 + 1] = head_pos - shift_map[i];
+            }
+            head_points[26] = head_pos;
+            HitResult res;
+            foreach(Vector3 head_point in head_points)
+            {
+                res = World.TraceLine(camera_pos, head_point, TraceFlags.IntersectEverything, ped);
+                if (!res.Hit)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private static bool HasHelmet(Ped ped)
         {
             //Get its model hash to recognize the character
@@ -103,15 +141,15 @@ namespace HelmetLogger
                     {   
                         float ped_distance = ped.DistanceTo(player_pos);
                         isClose = ped_distance <= 12;
-                        if(ped.IsRendered && ped.IsVisible && ped.IsOnScreen && ped.IsHuman && isClose)
+                        //Get position of face (center of the 3D bounding box)
+                        head_pos3D = ped.GetBonePosition(PedBoneId.Head);
+                        if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen && ped.IsHuman && isClose && isHeadNotOccluded(ped, Camera.RenderingCamera.Position, head_pos3D))
                         {
                             num_peds++;
                             //Game.LogTrivial("Distance: " + ped_distance);
                             Vector2 ped_position = World.ConvertWorldPositionToScreenPosition(ped.Position);
-                            //Get position of face (center of the 3D bounding box)
-                            head_pos3D = ped.GetBonePosition(PedBoneId.Head);
                             head_pos2D = DivideVector2(World.ConvertWorldPositionToScreenPosition(head_pos3D), res);
-                            head_dim3D = new Vector3(0.15f, 0.15f, 0.2f); //Overestimation of the dimensions of a head with an helmet
+                            head_dim3D = new Vector3(0.15f, 0.17f, 0.23f); //Overestimation of the dimensions of a head with a helmet
                             //Compute the 2D coordinates of the 3D bounding box corners, then take the min and max component to find the 2D bounding box
                             for (int i = 0; i < 7; ++i)
                             {
