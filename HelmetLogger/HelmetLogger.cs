@@ -86,6 +86,8 @@ namespace HelmetLogger
                 case "S_M_Y_FIREMAN_01":
                 case "U_M_M_FIBARCHITECT":
                 case "PLAYER_ZERO":
+                case "S_M_Y_CONSTRUCT_02":
+                case "S_M_M_DOCKWORK_01":
                     if (prop_index == 0) return true;
                     else return false;
                 case "PLAYER_ONE":
@@ -95,16 +97,8 @@ namespace HelmetLogger
                     if (prop_index == 0 || prop_index == 4) return true;
                     else return false;
                 case "S_M_Y_CONSTRUCT_01":
-                    if (prop_index == 1 || prop_index == 2) return true;
-                    else return false;
-                case "S_M_Y_CONSTRUCT_02":
-                    if (prop_index == 0 || prop_index == 1) return true;
-                    else return false;
                 case "S_M_Y_DOCKWORK_01":
-                    if (prop_index == 1 || prop_index == 3) return true;
-                    else return false;
-                case "S_M_M_DOCKWORK_01":
-                    if (prop_index == 0 || prop_index == 2) return true;
+                    if (prop_index == 1) return true;
                     else return false;
                 default:
                     return false;
