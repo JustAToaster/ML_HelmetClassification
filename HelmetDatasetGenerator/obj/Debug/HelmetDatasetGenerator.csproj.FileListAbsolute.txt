@@ -1,0 +1,9 @@
+C:\Users\Dani\source\repos\HelmetDatasetGenerator\bin\Debug\HelmetDatasetGenerator.dll
+C:\Users\Dani\source\repos\HelmetDatasetGenerator\bin\Debug\HelmetDatasetGenerator.pdb
+C:\Users\Dani\source\repos\HelmetDatasetGenerator\bin\Debug\RagePluginHookSDK.dll
+C:\Users\Dani\source\repos\HelmetDatasetGenerator\bin\Debug\RagePluginHookSDK.xml
+C:\Users\Dani\source\repos\HelmetDatasetGenerator\obj\Debug\HelmetDatasetGenerator.csprojAssemblyReference.cache
+C:\Users\Dani\source\repos\HelmetDatasetGenerator\obj\Debug\HelmetDatasetGenerator.csproj.CoreCompileInputs.cache
+C:\Users\Dani\source\repos\HelmetDatasetGenerator\obj\Debug\HelmetDatasetGenerator.csproj.CopyComplete
+C:\Users\Dani\source\repos\HelmetDatasetGenerator\obj\Debug\HelmetDatasetGenerator.dll
+C:\Users\Dani\source\repos\HelmetDatasetGenerator\obj\Debug\HelmetDatasetGenerator.pdb
