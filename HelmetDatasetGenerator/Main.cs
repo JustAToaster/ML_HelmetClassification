@@ -21,6 +21,7 @@ namespace HelmetDatasetGenerator
         {
             HelmetLogger helmetLogger = HelmetLogger.Instance;
             ScenarioCreator scenarioCreator = ScenarioCreator.Instance;
+            num_screenshots = 0;
             while (true)
             {
                 if (Game.IsKeyDown(Keys.O))
@@ -48,6 +49,7 @@ namespace HelmetDatasetGenerator
                     }
                     scenarioCreator.GenerateRandomCamera();
                     Thread.Sleep(500);
+                    
                     //Game.IsPaused = true;
                     if (helmetLogger.LogInformationOnScreen(num_screenshots))
                     {

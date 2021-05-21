@@ -142,7 +142,6 @@ namespace HelmetDatasetGenerator
                 default:
                     return false;
             }
-            return false;
         }
 
         private Vector2 GetHead2DBBox(Vector3 head_pos3D)
@@ -178,13 +177,16 @@ namespace HelmetDatasetGenerator
             foreach (Ped ped in peds)
             {
                 float ped_distance = ped.DistanceTo(Camera.RenderingCamera.Position);
+                Game.LogTrivial("Distance " + ped_distance.ToString() + " for ped " + ped.Model);
                 isClose = ped_distance <= 30;
                 //Get position of face (center of the 3D bounding box)
                 Vector3 head_pos3D = ped.GetBonePosition(PedBoneId.Head);
                 if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen && ped.IsHuman && isClose && isHeadNotOccluded(ped, Camera.RenderingCamera.Position, head_pos3D))
                 {
+                    Game.LogTrivial("Trying to annotate for ped " + ped.Model);
                     num_peds++;
                     head_dim2D = GetHead2DBBox(head_pos3D);
+                    Game.LogTrivial("Got head bbox of ped " + ped.Model);
                     head_pos2D = DivideVector2(World.ConvertWorldPositionToScreenPosition(head_pos3D), res);
                     if (InBounds(head_pos2D, head_dim2D) && BoxBigEnough(head_dim2D))
                     {
@@ -201,7 +203,7 @@ namespace HelmetDatasetGenerator
                         Game.LogTrivial("Pedestrians found " + num_peds + ", helmets found " + num_helmets);
                         writer.Close();
                         if (File.Exists(@txt_dir) && screenshotTaker.SaveScreenshot(num_screenshots)) return true;
-                        else File.Delete(txt_dir);
+                        else File.Delete(@txt_dir);
                     }
                     else Game.LogTrivial("Pedestrian found out of image bounds");
                 }
