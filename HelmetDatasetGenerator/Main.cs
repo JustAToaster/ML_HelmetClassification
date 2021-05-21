@@ -38,21 +38,20 @@ namespace HelmetDatasetGenerator
                 if (isRecording)
                 {
                     //Change location every 500 screenshots
-                    //Game.LogTrivial("Num screenshots: " + num_screenshots);
-                    if (num_screenshots % 250 == 0)
+                    if (num_screenshots % 500 == 0)
                     {
                         scenarioCreator.TeleportToNextLocation();
                         GameFiber.Sleep(5000);
                     }
-                    //Change time of day every 50 screenshots
-                    if (num_screenshots % 50 == 0)
+                    //Regenerate peds on screen every 100 screenshots
+                    if (num_screenshots % 100 == 0)
                     {
                         scenarioCreator.ClearArea();
                         scenarioCreator.GenerateRandomPeds();
                         GameFiber.Sleep(3000);
                     }
-                    //Change weather and time of day every 100 screenshots
-                    if (num_screenshots % 100 == 0)
+                    //Change weather and time of day every 250 screenshots
+                    if (num_screenshots % 250 == 0)
                     {
                         scenarioCreator.RandomWeather();
                         scenarioCreator.RandomTimeOfDay();
@@ -62,10 +61,12 @@ namespace HelmetDatasetGenerator
                     GameFiber.Sleep(500);
 
                     //Game.IsPaused = true;
+                    Game.TimeScale = 0.0f;
                     if (helmetLogger.LogInformationOnScreen(num_screenshots))
                     {
                         num_screenshots++;
                     }
+                    Game.TimeScale = 1.0f;
                     //Game.IsPaused = false;
                     GameFiber.Sleep(3000);
                 }

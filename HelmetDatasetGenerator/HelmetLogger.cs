@@ -72,7 +72,7 @@ namespace HelmetDatasetGenerator
         //Check for occlusion by tracing a ray to 27 points uniformly distributed around the head center
         private static bool IsHeadNotOccluded(Ped ped, Vector3 camera_pos, Vector3 head_pos)
         {
-            float pos_shift = 0.04f;
+            float pos_shift = 0.03f;
             Vector3[] shift_map = new Vector3[] {
                 new Vector3(pos_shift, pos_shift, pos_shift),
                 new Vector3(pos_shift, pos_shift, 0),
@@ -165,8 +165,17 @@ namespace HelmetDatasetGenerator
             return new Vector2(max_corner.X - min_corner.X, max_corner.Y - min_corner.Y);
         }
 
+        private void MakeAllPedsVisible(Ped[] peds)
+        {
+            foreach(Ped ped in peds)
+            {
+                ped.IsVisible = true;
+            }
+        }
+
         public bool LogInformationOnScreen(int num_screenshots)
         {
+            bool couldAnnotate = false;
             num_peds = 0;
             num_helmets = 0;
             txt_dir = "C:\\GTAV_helmet_data\\helmet_dataset\\labels\\helmet_train\\im" + num_screenshots + ".txt";
@@ -203,13 +212,18 @@ namespace HelmetDatasetGenerator
                         writer.WriteLine(class_num + head_pos2D.X + " " + head_pos2D.Y + " " + head_dim2D.X + " " + head_dim2D.Y);
                         //Game.LogTrivial("Pedestrians found " + num_peds + ", helmets found " + num_helmets);
                     }
+                    //If it does not respet all conditions to be annotated, make it invisibile to avoid confusion in training
+                    else ped.IsVisible = false;
                     //else Game.LogTrivial("Pedestrian found out of image bounds");
                 }
+                else ped.IsVisible = false;
             }
             writer.Close();
-            if (File.Exists(@txt_dir) && screenshotTaker.SaveScreenshot(num_screenshots)) return true;
-            File.Delete(@txt_dir);
-            return false;
+            GameFiber.Sleep(500);
+            if (File.Exists(@txt_dir) && screenshotTaker.SaveScreenshot(num_screenshots)) couldAnnotate = true;
+            else File.Delete(@txt_dir);
+            MakeAllPedsVisible(peds);
+            return couldAnnotate;
         }
     }
 }
