@@ -152,7 +152,7 @@ namespace HelmetDatasetGenerator
             {
 
                 random_ped();
-                Thread.Sleep(50);
+                GameFiber.Sleep(50);
 
             }
         }

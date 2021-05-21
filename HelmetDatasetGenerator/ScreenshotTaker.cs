@@ -50,6 +50,7 @@ namespace HelmetDatasetGenerator
             graphics = System.Drawing.Graphics.FromImage(bitmap);
             graphics.CopyFromScreen(0, 0, 0, 0, resolution);
             img_dir = "C:\\GTAV_helmet_data\\helmet_dataset\\images\\helmet_train\\im" + num_screenshots + ".png";
+            File.Delete(@img_dir);
             bitmap.Save(img_dir, ImageFormat.Png);
             return File.Exists(@img_dir);
         }

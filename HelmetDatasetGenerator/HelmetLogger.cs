@@ -16,7 +16,7 @@ namespace HelmetDatasetGenerator
     {
         private static HelmetLogger instance = null;
 
-        private static Vector3[] bbox_map = { new Vector3(1, 1, 1), new Vector3(-1, 1, 1), new Vector3(1, -1, 1), new Vector3(1, 1, -1), new Vector3(-1, -1, 1), new Vector3(1, -1, -1), new Vector3(-1, 1, -1), new Vector3(-1, -1, -1) };
+        private static Vector3[] bbox_map = new Vector3[] { new Vector3(1, 1, 1), new Vector3(-1, 1, 1), new Vector3(1, -1, 1), new Vector3(1, 1, -1), new Vector3(-1, -1, 1), new Vector3(1, -1, -1), new Vector3(-1, 1, -1), new Vector3(-1, -1, -1) };
         private static Vector2 min_box;
         private static Vector3 head_dim3D;
         private static Vector2 min_corner;
@@ -33,7 +33,7 @@ namespace HelmetDatasetGenerator
             min_corner = new Vector2(0, 0);
             max_corner = new Vector2(0, 0);
             res = new Vector2((float)Game.Resolution.Width, (float)Game.Resolution.Height);
-            min_box = DivideVector2(new Vector2(30.0f, 30.0f), res); //Minimum possible size of a 2D bounding box in pixels, normalized with the resolution 
+            min_box = DivideVector2(new Vector2(20.0f, 20.0f), res); //Minimum possible size of a 2D bounding box in pixels, normalized with the resolution 
             head_dim3D = new Vector3(0.15f, 0.17f, 0.23f); //Overestimation of a head with a helmet
             isClose = false;
         }
@@ -70,10 +70,10 @@ namespace HelmetDatasetGenerator
         }
 
         //Check for occlusion by tracing a ray to 27 points uniformly distributed around the head center
-        private static bool isHeadNotOccluded(Ped ped, Vector3 camera_pos, Vector3 head_pos)
+        private static bool IsHeadNotOccluded(Ped ped, Vector3 camera_pos, Vector3 head_pos)
         {
             float pos_shift = 0.04f;
-            Vector3[] shift_map = {
+            Vector3[] shift_map = new Vector3[] {
                 new Vector3(pos_shift, pos_shift, pos_shift),
                 new Vector3(pos_shift, pos_shift, 0),
                 new Vector3(pos_shift, 0, pos_shift),
@@ -91,8 +91,8 @@ namespace HelmetDatasetGenerator
             Vector3[] head_points = new Vector3[27];
             for (int i = 0; i < 13; ++i)
             {
-                head_points[i << 1] = head_pos + shift_map[i];
-                head_points[i << 1 + 1] = head_pos - shift_map[i];
+                head_points[2*i] = head_pos + shift_map[i];
+                head_points[2*i + 1] = head_pos - shift_map[i];
             }
             head_points[26] = head_pos;
             HitResult res;
@@ -170,6 +170,7 @@ namespace HelmetDatasetGenerator
             num_peds = 0;
             num_helmets = 0;
             txt_dir = "C:\\GTAV_helmet_data\\helmet_dataset\\labels\\helmet_train\\im" + num_screenshots + ".txt";
+            File.Delete(@txt_dir);
             writer = new StreamWriter(txt_dir, true, Encoding.ASCII);
             writer.NewLine = "\n";
             Ped[] peds = World.GetAllPeds();
@@ -177,16 +178,16 @@ namespace HelmetDatasetGenerator
             foreach (Ped ped in peds)
             {
                 float ped_distance = ped.DistanceTo(Camera.RenderingCamera.Position);
-                Game.LogTrivial("Distance " + ped_distance.ToString() + " for ped " + ped.Model);
-                isClose = ped_distance <= 30;
+                //Game.LogTrivial("Distance " + ped_distance.ToString() + " for ped " + ped.Model);
+                isClose = ped_distance <= 150;
                 //Get position of face (center of the 3D bounding box)
                 Vector3 head_pos3D = ped.GetBonePosition(PedBoneId.Head);
-                if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen && ped.IsHuman && isClose && isHeadNotOccluded(ped, Camera.RenderingCamera.Position, head_pos3D))
+                if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen && ped.IsHuman && isClose && IsHeadNotOccluded(ped, Camera.RenderingCamera.Position, head_pos3D))
                 {
-                    Game.LogTrivial("Trying to annotate for ped " + ped.Model);
-                    num_peds++;
+                    //Game.LogTrivial("Trying to annotate for ped " + ped.Model);
+                    //num_peds++;
                     head_dim2D = GetHead2DBBox(head_pos3D);
-                    Game.LogTrivial("Got head bbox of ped " + ped.Model);
+                    //Game.LogTrivial("Got head bbox of ped " + ped.Model);
                     head_pos2D = DivideVector2(World.ConvertWorldPositionToScreenPosition(head_pos3D), res);
                     if (InBounds(head_pos2D, head_dim2D) && BoxBigEnough(head_dim2D))
                     {
@@ -200,14 +201,14 @@ namespace HelmetDatasetGenerator
                             class_num = "0 ";
                         }
                         writer.WriteLine(class_num + head_pos2D.X + " " + head_pos2D.Y + " " + head_dim2D.X + " " + head_dim2D.Y);
-                        Game.LogTrivial("Pedestrians found " + num_peds + ", helmets found " + num_helmets);
-                        writer.Close();
-                        if (File.Exists(@txt_dir) && screenshotTaker.SaveScreenshot(num_screenshots)) return true;
-                        else File.Delete(@txt_dir);
+                        //Game.LogTrivial("Pedestrians found " + num_peds + ", helmets found " + num_helmets);
                     }
-                    else Game.LogTrivial("Pedestrian found out of image bounds");
+                    //else Game.LogTrivial("Pedestrian found out of image bounds");
                 }
             }
+            writer.Close();
+            if (File.Exists(@txt_dir) && screenshotTaker.SaveScreenshot(num_screenshots)) return true;
+            File.Delete(@txt_dir);
             return false;
         }
     }

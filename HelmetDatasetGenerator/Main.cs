@@ -17,57 +17,70 @@ namespace HelmetDatasetGenerator
     public static class EntryPoint
     {
         private static int num_screenshots;
+        private static bool isRecording;
         public static void Main()
         {
             HelmetLogger helmetLogger = HelmetLogger.Instance;
             ScenarioCreator scenarioCreator = ScenarioCreator.Instance;
             num_screenshots = 0;
+            isRecording = false;
             while (true)
             {
                 if (Game.IsKeyDown(Keys.O))
                 {
-                    //Change location every 250 screenshots
-                    Game.LogTrivial("Num screenshots: " + num_screenshots);
+                    isRecording = true;
+                }
+                if (Game.IsKeyDown(Keys.U))
+                {
+                    Camera.DeleteAllCameras();
+                    isRecording = false;
+                }
+                if (isRecording)
+                {
+                    //Change location every 500 screenshots
+                    //Game.LogTrivial("Num screenshots: " + num_screenshots);
                     if (num_screenshots % 250 == 0)
                     {
                         scenarioCreator.TeleportToNextLocation();
-                        Thread.Sleep(5000);
+                        GameFiber.Sleep(5000);
                     }
                     //Change time of day every 50 screenshots
                     if (num_screenshots % 50 == 0)
                     {
                         scenarioCreator.ClearArea();
                         scenarioCreator.GenerateRandomPeds();
-                        Thread.Sleep(3000);
+                        GameFiber.Sleep(3000);
                     }
                     //Change weather and time of day every 100 screenshots
                     if (num_screenshots % 100 == 0)
                     {
                         scenarioCreator.RandomWeather();
                         scenarioCreator.RandomTimeOfDay();
-                        Thread.Sleep(1000);
+                        GameFiber.Sleep(1000);
                     }
                     scenarioCreator.GenerateRandomCamera();
-                    Thread.Sleep(500);
-                    
+                    GameFiber.Sleep(500);
+
                     //Game.IsPaused = true;
                     if (helmetLogger.LogInformationOnScreen(num_screenshots))
                     {
                         num_screenshots++;
                     }
                     //Game.IsPaused = false;
-                    Thread.Sleep(3000);
-                }
-                if (Game.IsKeyDown(Keys.Y))
-                {
-                    num_screenshots = 50000;
-                }
-                if (Game.IsKeyDown(Keys.U))
-                {
-                    Camera.DeleteAllCameras();
+                    GameFiber.Sleep(3000);
                 }
                 Rage.GameFiber.Yield();
             }
+        }
+        [Rage.Attributes.ConsoleCommand]
+        public static void Command_SetScreenshotNum()
+        {
+            num_screenshots = 50000;
+        }
+        [Rage.Attributes.ConsoleCommand]
+        public static void Command_ResetScreenshotNum()
+        {
+            num_screenshots = 0;
         }
     }
 }
