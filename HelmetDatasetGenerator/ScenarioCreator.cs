@@ -14,8 +14,11 @@ using System.Threading;
 
 namespace HelmetDatasetGenerator
 {
-    public class ScenarioCreator
+    public sealed class ScenarioCreator
     {
+
+        private static ScenarioCreator instance = null;
+
         private static String[] models = { "G_M_M_CHEMWORK_01", "S_M_Y_FIREMAN_01", "U_M_M_FIBARCHITECT", "PLAYER_ZERO", "PLAYER_ONE", "PLAYER_TWO", "S_M_Y_CONSTRUCT_01", "S_M_Y_CONSTRUCT_02", "S_M_M_DOCKWORK_01", "S_M_Y_DOCKWORK_01" };
 
         private static Vector3 cantiere1 = new Vector3(-456.0898f, -998.0738f, 23.84991f);
@@ -24,7 +27,19 @@ namespace HelmetDatasetGenerator
         private static Vector3 scalo = new Vector3(978.5798f, -3061.928f, 5.900765f);
         private static Vector3[] locations = { cantiere1, cantiere2, deserto, scalo };
 
-        public ScenarioCreator()
+        public static ScenarioCreator Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new ScenarioCreator();
+                }
+                return instance;
+            }
+        }
+
+        private ScenarioCreator()
         {
 
         }
@@ -103,20 +118,19 @@ namespace HelmetDatasetGenerator
             if (prob <= 0.5)
             {
 
-                cam.Position = Game.LocalPlayer.Character.Position + new Vector3(r.Next(0, 10), r.Next(0, 10), r.Next(0, 4));
+                Vector3 vettore = new Vector3(r.Next(0, 10), r.Next(0, 10), r.Next(0, 4));
                 Rotator rot = new Rotator(r.Next(-20, 15), 0, r.Next(0, 360));
                 cam.Rotation = rot;
+                NativeFunction.Natives.ATTACH_CAM_TO_ENTITY(cam, Game.LocalPlayer.Character, vettore.X, vettore.Y, vettore.Z, false);
 
 
             }
             else
             {
-
                 Ped r_ped = World.GetAllPeds()[r.Next(0, World.GetAllPeds().Length)];
-                Game.LogTrivial("distaza minima " + r_ped);
-                cam.Position = r_ped.Position + new Vector3(0, 0.7f, 0.7f);
-                Rotator rot = new Rotator(r.Next(0, 20), 0, 180);
+                Rotator rot = new Rotator(0, 0, 180);
                 cam.Rotation = rot;
+                NativeFunction.Natives.ATTACH_CAM_TO_ENTITY(cam, r_ped, 0f, 0.7f, 0.7f, false);
             }
         }
 

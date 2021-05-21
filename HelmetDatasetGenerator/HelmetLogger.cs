@@ -12,38 +12,42 @@ using System.Drawing;
 
 namespace HelmetDatasetGenerator
 {
-    public class HelmetLogger
+    public sealed class HelmetLogger
     {
+        private static HelmetLogger instance = null;
+
         private static Vector3[] bbox_map = { new Vector3(1, 1, 1), new Vector3(-1, 1, 1), new Vector3(1, -1, 1), new Vector3(1, 1, -1), new Vector3(-1, -1, 1), new Vector3(1, -1, -1), new Vector3(-1, 1, -1), new Vector3(-1, -1, -1) };
-        //Min box size in normalized pixels (30 x 30)
-        private static Vector2 min_box = new Vector2(0.015625f, 0.028f);
+        private static Vector2 min_box;
+        private static Vector3 head_dim3D;
         private static Vector2 min_corner;
         private static Vector2 max_corner;
-        public static int num_screenshots;
         private static int num_peds, num_helmets;
         private static StreamWriter writer;
         private static bool isClose;
-        private static Vector3 player_pos;
         private static Vector2 res;
+        private static string txt_dir;
+        private static ScreenshotTaker screenshotTaker = ScreenshotTaker.Instance;
 
-        public HelmetLogger()
+        private HelmetLogger()
         {
             min_corner = new Vector2(0, 0);
             max_corner = new Vector2(0, 0);
-            num_screenshots = num_peds = num_helmets = 0;
-            isClose = false;
-            player_pos = Game.LocalPlayer.Character.Position;
             res = new Vector2((float)Game.Resolution.Width, (float)Game.Resolution.Height);
+            min_box = DivideVector2(new Vector2(30.0f, 30.0f), res); //Minimum possible size of a 2D bounding box in pixels, normalized with the resolution 
+            head_dim3D = new Vector3(0.15f, 0.17f, 0.23f); //Overestimation of a head with a helmet
+            isClose = false;
         }
 
-        public void SetNumScreenshots(int num)
+        public static HelmetLogger Instance
         {
-            num_screenshots = num;
-        }
-
-        public void IncrementScreenshots()
-        {
-            num_screenshots++;
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new HelmetLogger();
+                }
+                return instance;
+            }
         }
 
         private static Vector3 MultiplyVector3(Vector3 vec1, Vector3 vec2)
@@ -141,59 +145,63 @@ namespace HelmetDatasetGenerator
             return false;
         }
 
-        public bool LogInformationOnScreen()
+        private Vector2 GetHead2DBBox(Vector3 head_pos3D)
+        {
+            Vector2[] bbox_corners = new Vector2[8];
+            //Compute the 2D coordinates of the 3D bounding box corners, then take the min and max component to find the 2D bounding box
+            for (int i = 0; i < 7; ++i)
+            {
+                bbox_corners[i] = DivideVector2(World.ConvertWorldPositionToScreenPosition(head_pos3D + MultiplyVector3(bbox_map[i], head_dim3D)), res);
+                if (i == 0)
+                {
+                    min_corner = max_corner = bbox_corners[i];
+                }
+                else
+                {
+                    min_corner = Vector2.Minimize(bbox_corners[i], min_corner);
+                    max_corner = Vector2.Maximize(bbox_corners[i], max_corner);
+                }
+            }
+            //Compute 2D bounding box width and height
+            return new Vector2(max_corner.X - min_corner.X, max_corner.Y - min_corner.Y);
+        }
+
+        public bool LogInformationOnScreen(int num_screenshots)
         {
             num_peds = 0;
             num_helmets = 0;
-            writer = new StreamWriter("C:\\GTAV_helmet_data\\helmet_dataset\\labels\\helmet_train\\im" + num_screenshots + ".txt", true, Encoding.ASCII);
+            txt_dir = "C:\\GTAV_helmet_data\\helmet_dataset\\labels\\helmet_train\\im" + num_screenshots + ".txt";
+            writer = new StreamWriter(txt_dir, true, Encoding.ASCII);
             writer.NewLine = "\n";
             Ped[] peds = World.GetAllPeds();
-            Vector3 head_pos3D, head_dim3D;
-            Vector2 head_pos2D, head_dim2D;
-            Vector2[] bbox_corners = new Vector2[8];
+            Vector2 head_dim2D, head_pos2D;
             foreach (Ped ped in peds)
             {
                 float ped_distance = ped.DistanceTo(Camera.RenderingCamera.Position);
                 isClose = ped_distance <= 30;
                 //Get position of face (center of the 3D bounding box)
-                head_pos3D = ped.GetBonePosition(PedBoneId.Head);
+                Vector3 head_pos3D = ped.GetBonePosition(PedBoneId.Head);
                 if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen && ped.IsHuman && isClose && isHeadNotOccluded(ped, Camera.RenderingCamera.Position, head_pos3D))
                 {
                     num_peds++;
-                    //Game.LogTrivial("Distance: " + ped_distance);
-                    Vector2 ped_position = World.ConvertWorldPositionToScreenPosition(ped.Position);
+                    head_dim2D = GetHead2DBBox(head_pos3D);
                     head_pos2D = DivideVector2(World.ConvertWorldPositionToScreenPosition(head_pos3D), res);
-                    head_dim3D = new Vector3(0.15f, 0.17f, 0.23f); //Overestimation of the dimensions of a head with a helmet
-                                                                   //Compute the 2D coordinates of the 3D bounding box corners, then take the min and max component to find the 2D bounding box
-                    for (int i = 0; i < 7; ++i)
-                    {
-                        bbox_corners[i] = DivideVector2(World.ConvertWorldPositionToScreenPosition(head_pos3D + MultiplyVector3(bbox_map[i], head_dim3D)), res);
-                        if (i == 0)
-                        {
-                            min_corner = max_corner = bbox_corners[i];
-                        }
-                        else
-                        {
-                            min_corner = Vector2.Minimize(bbox_corners[i], min_corner);
-                            max_corner = Vector2.Maximize(bbox_corners[i], max_corner);
-                        }
-                    }
-                    //Compute 2D bounding box width and height
-                    head_dim2D = new Vector2(max_corner.X - min_corner.X, max_corner.Y - min_corner.Y);
                     if (InBounds(head_pos2D, head_dim2D) && BoxBigEnough(head_dim2D))
                     {
+                        string class_num;
                         if (HasHelmet(ped))
                         {
-                            writer.WriteLine("1 " + head_pos2D.X + " " + head_pos2D.Y + " " + head_dim2D.X + " " + head_dim2D.Y);
-                            num_helmets++;
+                            class_num = "1 ";
                         }
                         else
                         {
-                            writer.WriteLine("0 " + head_pos2D.X + " " + head_pos2D.Y + " " + head_dim2D.X + " " + head_dim2D.Y);
+                            class_num = "0 ";
                         }
+                        writer.WriteLine(class_num + head_pos2D.X + " " + head_pos2D.Y + " " + head_dim2D.X + " " + head_dim2D.Y);
                         Game.LogTrivial("Pedestrians found " + num_peds + ", helmets found " + num_helmets);
                         writer.Close();
-                        return true;
+                        if (File.Exists(@txt_dir) && screenshotTaker.SaveScreenshot(num_screenshots)) return true;
+                        else File.Delete(txt_dir);
                     }
                     else Game.LogTrivial("Pedestrian found out of image bounds");
                 }

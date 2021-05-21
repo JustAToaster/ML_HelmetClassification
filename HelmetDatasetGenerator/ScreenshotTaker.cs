@@ -15,17 +15,33 @@ using System.Threading;
 
 namespace HelmetDatasetGenerator
 {
-    public class ScreenshotTaker
+    public sealed class ScreenshotTaker
     {
+        private static ScreenshotTaker instance = null;
+
         private static Size resolution = Game.Resolution;
         private static Bitmap bitmap;
         private static System.Drawing.Graphics graphics;
-        public ScreenshotTaker()
+        private static string img_dir;
+
+        public static ScreenshotTaker Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new ScreenshotTaker();
+                }
+                return instance;
+            }
+        }
+
+        private ScreenshotTaker()
         {
 
         }
 
-        public void TakeScreenShot()
+        public bool SaveScreenshot(int num_screenshots)
         {
             Game.LocalPlayer.Character.IsVisible = false;
             NativeFunction.Natives.DisplayHud(false);
@@ -33,7 +49,9 @@ namespace HelmetDatasetGenerator
             bitmap = new Bitmap(resolution.Width, resolution.Height, PixelFormat.Format24bppRgb);
             graphics = System.Drawing.Graphics.FromImage(bitmap);
             graphics.CopyFromScreen(0, 0, 0, 0, resolution);
-            bitmap.Save("C:\\GTAV_helmet_data\\helmet_dataset\\images\\helmet_train\\im" + HelmetLogger.num_screenshots + ".png", ImageFormat.Png);
+            img_dir = "C:\\GTAV_helmet_data\\helmet_dataset\\images\\helmet_train\\im" + num_screenshots + ".png";
+            bitmap.Save(img_dir, ImageFormat.Png);
+            return File.Exists(@img_dir);
         }
     }
 }
