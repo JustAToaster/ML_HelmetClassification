@@ -73,9 +73,9 @@ namespace HelmetDatasetGenerator
             }
         }
         [Rage.Attributes.ConsoleCommand]
-        public static void Command_SetScreenshotNum()
+        public static void Command_SetScreenshotNum(int num)
         {
-            num_screenshots = 50000;
+            num_screenshots = num;
         }
         [Rage.Attributes.ConsoleCommand]
         public static void Command_ResetScreenshotNum()
