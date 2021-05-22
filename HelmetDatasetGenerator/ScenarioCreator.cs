@@ -165,25 +165,27 @@ namespace HelmetDatasetGenerator
             Camera cam = new Camera(true);
 
 
-            double prob = r.NextDouble();
-
-            if (prob <= 0.5)
+            double prob;
+            do
             {
+                prob = r.NextDouble();
 
-                Vector3 vettore = new Vector3(r.Next(0, 10), r.Next(0, 10), r.Next(0, 4));
-                Rotator rot = new Rotator(r.Next(-20, 15), r.Next(-5,5), r.Next(0, 360));
-                cam.Rotation = rot;
-                NativeFunction.Natives.ATTACH_CAM_TO_ENTITY(cam, Game.LocalPlayer.Character, vettore.X, vettore.Y, vettore.Z, false);
-
-
-            }
-            else
-            {
-                Ped r_ped = World.GetAllPeds()[r.Next(0, World.GetAllPeds().Length)];
-                Rotator rot = new Rotator(r.Next(-10, +10), r.Next(-5,5), 180);
-                cam.Rotation = rot;
-                cam.AttachToEntity(r_ped, new Vector3(0, (float)GetRandomNumber(r, 0.6, 0.9), 0.7f), false);
-            }
+                if (prob <= 0.5)
+                {
+                    Vector3 vettore = new Vector3(r.Next(0, 10), r.Next(0, 10), r.Next(0, 4));
+                    Rotator rot = new Rotator(r.Next(-20, 15), r.Next(-5, 5), r.Next(0, 360));
+                    cam.Rotation = rot;
+                    cam.AttachToEntity(Game.LocalPlayer.Character, vettore, false);
+                }
+                else
+                {
+                    Ped r_ped = World.GetAllPeds()[r.Next(0, World.GetAllPeds().Length)];
+                    Rotator rot = new Rotator(r.Next(-10, +10), r.Next(-5, 5), 180);
+                    cam.Rotation = rot;
+                    cam.AttachToEntity(r_ped, new Vector3(0, (float)GetRandomNumber(r, 0.6, 0.9), 0.7f), false);
+                }
+            } while (cam.HeightAboveGround < 0);
+            //Make sure the cam is not out of bounds for some reason: for example, a ped gets generated in a place without collisions and the cam gets attached to it
         }
 
         public void RandomTimeOfDay()
