@@ -21,7 +21,6 @@ namespace HelmetDatasetGenerator
         private static Vector3 head_dim3D;
         private static Vector2 min_corner;
         private static Vector2 max_corner;
-        private static int num_peds, num_helmets;
         private static StreamWriter writer;
         private static bool isClose;
         private static Vector2 res;
@@ -33,8 +32,8 @@ namespace HelmetDatasetGenerator
             min_corner = new Vector2(0, 0);
             max_corner = new Vector2(0, 0);
             res = new Vector2((float)Game.Resolution.Width, (float)Game.Resolution.Height);
-            min_box = DivideVector2(new Vector2(20.0f, 20.0f), res); //Minimum possible size of a 2D bounding box in pixels, normalized with the resolution 
-            head_dim3D = new Vector3(0.15f, 0.17f, 0.23f); //Overestimation of a head with a helmet
+            min_box = DivideVector2(new Vector2(25.0f, 25.0f), res); //Minimum possible size of a 2D bounding box in pixels, normalized with the resolution 
+            head_dim3D = new Vector3(0.15f, 0.16f, 0.18f); //Overestimation of a head with a helmet
             isClose = false;
         }
 
@@ -72,7 +71,7 @@ namespace HelmetDatasetGenerator
         //Check for occlusion by tracing a ray to 27 points uniformly distributed around the head center
         private static bool IsHeadNotOccluded(Ped ped, Vector3 camera_pos, Vector3 head_pos)
         {
-            float pos_shift = 0.03f;
+            float pos_shift = 0.01f;
             Vector3[] shift_map = new Vector3[] {
                 new Vector3(pos_shift, pos_shift, pos_shift),
                 new Vector3(pos_shift, pos_shift, 0),
@@ -176,8 +175,6 @@ namespace HelmetDatasetGenerator
         public bool LogInformationOnScreen(int num_screenshots)
         {
             bool couldAnnotate = false;
-            num_peds = 0;
-            num_helmets = 0;
             txt_dir = "C:\\GTAV_helmet_data\\helmet_dataset\\labels\\helmet_train\\im" + num_screenshots + ".txt";
             File.Delete(@txt_dir);
             writer = new StreamWriter(txt_dir, true, Encoding.ASCII);
@@ -188,16 +185,17 @@ namespace HelmetDatasetGenerator
             {
                 float ped_distance = ped.DistanceTo(Camera.RenderingCamera.Position);
                 //Game.LogTrivial("Distance " + ped_distance.ToString() + " for ped " + ped.Model);
-                isClose = ped_distance <= 150;
+                isClose = ped_distance <= 200;
                 //Get position of face (center of the 3D bounding box)
                 Vector3 head_pos3D = ped.GetBonePosition(PedBoneId.Head);
+                Vector3 verticalOffset = new Vector3(0, 0, 0.05f);
                 if (ped.IsRendered && ped.IsVisible && ped.IsOnScreen && ped.IsHuman && isClose && IsHeadNotOccluded(ped, Camera.RenderingCamera.Position, head_pos3D))
                 {
                     //Game.LogTrivial("Trying to annotate for ped " + ped.Model);
                     //num_peds++;
-                    head_dim2D = GetHead2DBBox(head_pos3D);
+                    head_dim2D = GetHead2DBBox(head_pos3D+verticalOffset);
                     //Game.LogTrivial("Got head bbox of ped " + ped.Model);
-                    head_pos2D = DivideVector2(World.ConvertWorldPositionToScreenPosition(head_pos3D), res);
+                    head_pos2D = DivideVector2(World.ConvertWorldPositionToScreenPosition(head_pos3D+verticalOffset), res);
                     if (InBounds(head_pos2D, head_dim2D) && BoxBigEnough(head_dim2D))
                     {
                         string class_num;

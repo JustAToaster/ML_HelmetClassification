@@ -43,6 +43,12 @@ namespace HelmetDatasetGenerator
         {
 
         }
+
+        public double GetRandomNumber(Random random, double minimum, double maximum)
+        {
+            return random.NextDouble() * (maximum - minimum) + minimum;
+        }
+
         private static void random_ped()
         {
             Random r = new Random();
@@ -119,7 +125,7 @@ namespace HelmetDatasetGenerator
             {
 
                 Vector3 vettore = new Vector3(r.Next(0, 10), r.Next(0, 10), r.Next(0, 4));
-                Rotator rot = new Rotator(r.Next(-20, 15), 0, r.Next(0, 360));
+                Rotator rot = new Rotator(r.Next(-20, 15), r.Next(-5,5), r.Next(0, 360));
                 cam.Rotation = rot;
                 NativeFunction.Natives.ATTACH_CAM_TO_ENTITY(cam, Game.LocalPlayer.Character, vettore.X, vettore.Y, vettore.Z, false);
 
@@ -128,9 +134,9 @@ namespace HelmetDatasetGenerator
             else
             {
                 Ped r_ped = World.GetAllPeds()[r.Next(0, World.GetAllPeds().Length)];
-                Rotator rot = new Rotator(0, 0, 180);
+                Rotator rot = new Rotator(r.Next(-10, +10), r.Next(-5,5), 180);
                 cam.Rotation = rot;
-                NativeFunction.Natives.ATTACH_CAM_TO_ENTITY(cam, r_ped, 0f, 0.7f, 0.7f, false);
+                cam.AttachToEntity(r_ped, new Vector3(0, (float)GetRandomNumber(r, 0.6, 0.9), 0.7f), false);
             }
         }
 
@@ -174,7 +180,7 @@ namespace HelmetDatasetGenerator
 
             Ped[] all_peds;
             all_peds = World.GetAllPeds();
-            Game.LogTrivial("num di peds " + all_peds.Length);
+            //Game.LogTrivial("num di peds " + all_peds.Length);
             for (int i = 0; i < all_peds.Length; i++)
             {
                 float dist = all_peds[i].DistanceTo(Game.LocalPlayer.Character.Position);
