@@ -63,6 +63,7 @@ namespace HelmetDatasetGenerator
 
             double prob = r.NextDouble();
             int drawableID = 0;
+            //Give helmet 50% of the time
             if (prob <= 0.5)
             {
                 int[] drawable_list;
@@ -91,17 +92,61 @@ namespace HelmetDatasetGenerator
                     default:
                         break;
                 }
-
-                double prob2 = r.NextDouble();
-                if (prob2 <= 0.3)
-                {
-                    NativeFunction.Natives.TaskUseMobilePhoneTimed(random_ped, 40000);
-                }
-                else if (prob2 > 0.7)
-                {
-                    NativeFunction.Natives.TASK_WANDER_IN_AREA(random_ped, spawn + new Vector3(r.Next(0, 10), r.Next(0, 10), 0), 0.4f, 0.5f, 0.9f);
-                }
                 NativeFunction.Natives.SET_PED_PROP_INDEX(random_ped, 0, drawableID, 0, true);
+
+            }
+            //Give random hat 20% of the time
+            else if (prob <= 0.7)
+            {
+                int[] drawable_list;
+                switch (model_name)
+                {
+                    case "PLAYER_ZERO":
+                        drawable_list = new int[] { 1, 6, 8, 9, 12, 13, 21  };
+                        drawableID = drawable_list[r.Next(0, drawable_list.Length - 1)];
+                        NativeFunction.Natives.SET_PED_PROP_INDEX(random_ped, 0, drawableID, 0, true);
+                        break;
+                    case "S_M_Y_CONSTRUCT_02":
+                        drawableID = 2;
+                        NativeFunction.Natives.SET_PED_PROP_INDEX(random_ped, 0, drawableID, 0, true);
+                        break;
+                    case "S_M_M_DOCKWORK_01":
+                        drawableID = 1;
+                        NativeFunction.Natives.SET_PED_PROP_INDEX(random_ped, 0, drawableID, 0, true);
+                        break;
+                    case "PLAYER_ONE":
+                        drawable_list = new int[] { 1, 3, 4, 15, 16, 18, 19 };
+                        drawableID = drawable_list[r.Next(0, drawable_list.Length - 1)];
+                        NativeFunction.Natives.SET_PED_PROP_INDEX(random_ped, 0, drawableID, 0, true);
+                        break;
+                    case "PLAYER_TWO":
+                        drawable_list = new int[] { 1, 3, 7, 10, 12, 13, 26  };
+                        drawableID = drawable_list[r.Next(0, drawable_list.Length - 1)];
+                        NativeFunction.Natives.SET_PED_PROP_INDEX(random_ped, 0, drawableID, 0, true);
+                        break;
+                    case "S_M_Y_CONSTRUCT_01":
+                        drawable_list = new int[] { 0, 3 };
+                        drawableID = drawable_list[r.Next(0, drawable_list.Length - 1)];
+                        NativeFunction.Natives.SET_PED_PROP_INDEX(random_ped, 0, drawableID, 0, true);
+                        break;
+                    case "S_M_Y_DOCKWORK_01":
+                        drawable_list = new int[] { 0, 2 };
+                        drawableID = drawable_list[r.Next(0, drawable_list.Length - 1)];
+                        NativeFunction.Natives.SET_PED_PROP_INDEX(random_ped, 0, drawableID, 0, true);
+                        break;
+                    //Character has no hat in the game files
+                    default:
+                        break;
+                }
+            }
+            double prob2 = r.NextDouble();
+            if (prob2 <= 0.3)
+            {
+                NativeFunction.Natives.TaskUseMobilePhoneTimed(random_ped, 40000);
+            }
+            else if (prob2 > 0.7)
+            {
+                NativeFunction.Natives.TASK_WANDER_IN_AREA(random_ped, spawn + new Vector3(r.Next(0, 10), r.Next(0, 10), 0), 0.4f, 0.5f, 0.9f);
             }
 
 
