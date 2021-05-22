@@ -54,11 +54,12 @@ namespace HelmetDatasetGenerator
             Random r = new Random();
             Vector3 player_pos = Game.LocalPlayer.Character.Position;
             Vector3 spawn = Game.LocalPlayer.Character.Position + new Vector3(r.Next(-10, 10), r.Next(-10, 10), 0);
-
+            
             int random_index = r.Next(0, models.Length - 1);
             String model_name = models[random_index];
-
-            Ped random_ped = new Ped(new Model(model_name), spawn + new Vector3(r.Next(-10, 10), r.Next(-10, 10), 0), r.Next(0, 360));
+            Vector3 ped_pos = spawn + new Vector3(r.Next(-10, 10), r.Next(-10, 10), 0);
+            Ped random_ped = new Ped(new Model(model_name), ped_pos, r.Next(0, 360));
+            random_ped.SetPositionWithSnap(ped_pos);
 
             double prob = r.NextDouble();
             int drawableID = 0;
