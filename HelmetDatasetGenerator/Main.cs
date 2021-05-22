@@ -76,11 +76,6 @@ namespace HelmetDatasetGenerator
                 {
                     RecordScene();
                 }
-                else
-                {
-                    isRecording = false;
-                    Game.LogTrivial("Finished Recording!");
-                }
                 Rage.GameFiber.Yield();
             }
         }
