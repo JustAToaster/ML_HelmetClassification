@@ -24,9 +24,10 @@ namespace HelmetDatasetGenerator
 
         private static Vector3 cantiere1 = new Vector3(-456.0898f, -998.0738f, 23.84991f);
         private static Vector3 cantiere2 = new Vector3(1384.0f, -2057.1f, 52.0f);
+        private static Vector3 cantiere3 = new Vector3(-157.3799f, -984.6835f, 254.1314f);
         private static Vector3 deserto = new Vector3(2121.7f, 4796.3f, 41.1f);
         private static Vector3 scalo = new Vector3(978.5798f, -3061.928f, 5.900765f);
-        private static Vector3[] locations = { cantiere1, cantiere2, deserto, scalo };
+        private static Vector3[] locations = { cantiere1, cantiere2, cantiere3, deserto, scalo };
 
         public static ScenarioCreator Instance
         {
@@ -156,7 +157,7 @@ namespace HelmetDatasetGenerator
         public void TeleportToNextLocation()
         {
             Random r = new Random();
-            World.TeleportLocalPlayer(locations[r.Next(0, locations.Length)], true);
+            World.TeleportLocalPlayer(locations[r.Next(0, locations.Length)], false);
         }
 
         public void GenerateRandomCamera()
