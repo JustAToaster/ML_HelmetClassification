@@ -20,6 +20,7 @@ namespace HelmetDatasetGenerator
         private static ScenarioCreator instance = null;
 
         private static String[] models = { "G_M_M_CHEMWORK_01", "S_M_Y_FIREMAN_01", "U_M_M_FIBARCHITECT", "PLAYER_ZERO", "PLAYER_ONE", "PLAYER_TWO", "S_M_Y_CONSTRUCT_01", "S_M_Y_CONSTRUCT_02", "S_M_M_DOCKWORK_01", "S_M_Y_DOCKWORK_01" };
+        private static Ped[] curr_peds = new Ped[15];
 
         private static Vector3 cantiere1 = new Vector3(-456.0898f, -998.0738f, 23.84991f);
         private static Vector3 cantiere2 = new Vector3(1384.0f, -2057.1f, 52.0f);
@@ -49,7 +50,7 @@ namespace HelmetDatasetGenerator
             return random.NextDouble() * (maximum - minimum) + minimum;
         }
 
-        private static void random_ped()
+        private static Ped random_ped()
         {
             Random r = new Random();
             Vector3 player_pos = Game.LocalPlayer.Character.Position;
@@ -149,7 +150,7 @@ namespace HelmetDatasetGenerator
                 NativeFunction.Natives.TASK_WANDER_IN_AREA(random_ped, spawn + new Vector3(r.Next(0, 10), r.Next(0, 10), 0), 0.4f, 0.5f, 0.9f);
             }
 
-
+            return random_ped;
         }
 
         public void TeleportToNextLocation()
@@ -165,27 +166,22 @@ namespace HelmetDatasetGenerator
             Camera cam = new Camera(true);
 
 
-            double prob;
-            do
-            {
-                prob = r.NextDouble();
+            double prob = r.NextDouble();
 
-                if (prob <= 0.5)
-                {
-                    Vector3 vettore = new Vector3(r.Next(0, 10), r.Next(0, 10), r.Next(0, 4));
-                    Rotator rot = new Rotator(r.Next(-20, 15), r.Next(-5, 5), r.Next(0, 360));
-                    cam.Rotation = rot;
-                    cam.AttachToEntity(Game.LocalPlayer.Character, vettore, false);
-                }
-                else
-                {
-                    Ped r_ped = World.GetAllPeds()[r.Next(0, World.GetAllPeds().Length)];
-                    Rotator rot = new Rotator(r.Next(-10, +10), r.Next(-5, 5), 180);
-                    cam.Rotation = rot;
-                    cam.AttachToEntity(r_ped, new Vector3(0, (float)GetRandomNumber(r, 0.6, 0.9), 0.7f), false);
-                }
-            } while (cam.HeightAboveGround < 0);
-            //Make sure the cam is not out of bounds for some reason: for example, a ped gets generated in a place without collisions and the cam gets attached to it
+            if (prob <= 0.5)
+            {
+                Vector3 vettore = new Vector3(r.Next(0, 10), r.Next(0, 10), r.Next(0, 4));
+                Rotator rot = new Rotator(r.Next(-20, 15), r.Next(-5, 5), r.Next(0, 360));
+                cam.Rotation = rot;
+                cam.AttachToEntity(Game.LocalPlayer.Character, vettore, false);
+            }
+            else
+            {
+                Ped r_ped = curr_peds[r.Next(0, curr_peds.Length)];
+                Rotator rot = new Rotator(r.Next(-10, +10), r.Next(-5, 5), 180);
+                cam.Rotation = rot;
+                cam.AttachToEntity(r_ped, new Vector3(0, (float)GetRandomNumber(r, 0.6, 0.9), 0.7f), false);
+            }
         }
 
         public void RandomTimeOfDay()
@@ -205,7 +201,7 @@ namespace HelmetDatasetGenerator
             for (int i = 0; i < 15; i++)
             {
 
-                random_ped();
+                curr_peds[i] = random_ped();
                 GameFiber.Sleep(50);
 
             }
@@ -237,19 +233,6 @@ namespace HelmetDatasetGenerator
                     all_peds[i].Delete();
 
                 }
-            }
-        }
-
-        public static void CreateScenario()
-        {
-            while (true)
-            {
-
-                if (Game.IsKeyDown(Keys.T))
-                {
-
-                }
-                Rage.GameFiber.Yield();
             }
         }
     }

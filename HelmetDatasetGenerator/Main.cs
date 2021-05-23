@@ -80,6 +80,14 @@ namespace HelmetDatasetGenerator
             }
         }
         [Rage.Attributes.ConsoleCommand]
+        public static void Command_SetCameraPosition(float posX, float posY, float posZ)
+        {
+            Rotator renderCameraRotation = Camera.RenderingCamera.Rotation;
+            Camera.DeleteAllCameras();
+            Camera cam = new Camera(true);
+            cam.Position = new Vector3(posX, posY, posZ);
+        }
+        [Rage.Attributes.ConsoleCommand]
         public static void Command_SetScreenshotNum(int num)
         {
             starting_num_screenshots = num;
