@@ -24,8 +24,8 @@ namespace HelmetDatasetGenerator
         private static ScenarioCreator scenarioCreator = ScenarioCreator.Instance;
         public static void RecordScene()
         {
-            //Change location every 500 screenshots
-            if (num_screenshots % 500 == 0)
+            //Change location every 1000 screenshots
+            if (num_screenshots % 1000 == 0)
             {
                 scenarioCreator.TeleportToNextLocation();
                 GameFiber.Sleep(7000);
@@ -78,6 +78,17 @@ namespace HelmetDatasetGenerator
                 }
                 Rage.GameFiber.Yield();
             }
+        }
+        [Rage.Attributes.ConsoleCommand]
+        public static void Command_SetValidationLocations()
+        {
+            scenarioCreator.SetValidationLocations();
+        }
+        [Rage.Attributes.ConsoleCommand]
+        public static void Command_SetArbitraryLocation(float x, float y, float z)
+        {
+            Vector3 loc = new Vector3(x, y, z);
+            scenarioCreator.SetArbitraryLocation(loc);
         }
         [Rage.Attributes.ConsoleCommand]
         public static void Command_SetCameraPosition(float posX, float posY, float posZ)

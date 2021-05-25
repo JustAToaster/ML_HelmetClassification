@@ -22,12 +22,18 @@ namespace HelmetDatasetGenerator
         private static String[] models = { "G_M_M_CHEMWORK_01", "S_M_Y_FIREMAN_01", "U_M_M_FIBARCHITECT", "PLAYER_ZERO", "PLAYER_ONE", "PLAYER_TWO", "S_M_Y_CONSTRUCT_01", "S_M_Y_CONSTRUCT_02", "S_M_M_DOCKWORK_01", "S_M_Y_DOCKWORK_01" };
         private static Ped[] curr_peds = new Ped[15];
 
+        //Training locations
         private static Vector3 cantiere1 = new Vector3(-456.0898f, -998.0738f, 23.84991f);
         private static Vector3 cantiere2 = new Vector3(1384.0f, -2057.1f, 52.0f);
         private static Vector3 cantiere3 = new Vector3(-157.3799f, -984.6835f, 254.1314f);
         private static Vector3 deserto = new Vector3(2121.7f, 4796.3f, 41.1f);
         private static Vector3 scalo = new Vector3(978.5798f, -3061.928f, 5.900765f);
-        private static Vector3[] locations = { cantiere1, cantiere2, cantiere3, deserto, scalo };
+
+        //Validation locations
+        private static Vector3 parco_eolico = new Vector3(2354.0f, 1830.3f, 101.1f);
+        private static Vector3 campo_aeroporto = new Vector3(-1336.0f, -3044.0f, 13.9f);
+
+        private static Vector3[] locations;
 
         public static ScenarioCreator Instance
         {
@@ -43,7 +49,17 @@ namespace HelmetDatasetGenerator
 
         private ScenarioCreator()
         {
+            locations = new Vector3[] { cantiere1, cantiere2, cantiere3, deserto, scalo };
+        }
 
+        public void SetValidationLocations()
+        {
+            locations = new Vector3[] { parco_eolico, campo_aeroporto };
+        }
+
+        public void SetArbitraryLocation(Vector3 location)
+        {
+            locations = new Vector3[] { location };
         }
 
         public double GetRandomNumber(Random random, double minimum, double maximum)
