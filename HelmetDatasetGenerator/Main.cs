@@ -24,6 +24,7 @@ namespace HelmetDatasetGenerator
         private static ScenarioCreator scenarioCreator = ScenarioCreator.Instance;
         public static void RecordScene()
         {
+            Game.MaxWantedLevel = 0;
             //Change location every 1000 screenshots
             if (num_screenshots % 1000 == 0)
             {
