@@ -18,6 +18,9 @@ The report can be found in the repository, both in doc and pdf format.
 
 It is also available on Google Docs: https://docs.google.com/document/d/1LUd79vkWqwkFgv8RF1pilxze5iq_C684B-PY_xWnZDk/edit?usp=sharing
 
+## Demo video
+A video example on how to run the demo can be found in the repository and here: https://streamable.com/uvsfz0
+
 ## Datasets
 The datasets created and used in this project are linked in the code Notebook as well.
 
