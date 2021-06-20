@@ -13,6 +13,11 @@ Training and test code Notebook: https://colab.research.google.com/drive/1QvG3LW
 
 Demo Notebook: https://colab.research.google.com/drive/1jn9ZQojtiB2L4tiiWwMVmobiwH7cDOQb?usp=sharing
 
+## Report
+The report can be found in the repository, both in doc and pdf format.
+
+It is also available on Google Docs: https://docs.google.com/document/d/1LUd79vkWqwkFgv8RF1pilxze5iq_C684B-PY_xWnZDk/edit?usp=sharing
+
 ## Datasets
 The datasets created and used in this project are linked in the code Notebook as well.
 
