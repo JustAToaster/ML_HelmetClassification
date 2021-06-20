@@ -36,3 +36,7 @@ Small real world dataset (162 imgs): https://drive.google.com/file/d/1PP8xFtQXhO
 Big real world dataset (7581 imgs): https://drive.google.com/file/d/1C5CtjBedghYIf3PDtMZHd9ZyzMGB_lIH/view?usp=sharing
 
 Big virtual world dataset (3000 imgs): https://studentiunict-my.sharepoint.com/:u:/g/personal/uni389888_studium_unict_it/EZ4B7oA3xGFHtij-SuwOl3MBBD8vUv1AnfgLq-IM-Qclkg?e=onzqfu
+
+
+The small real world dataset was taken from: http://aimir.isti.cnr.it/vw-ppe/
+The big real world dataset was taken from: https://github.com/njvisionpower/Safety-Helmet-Wearing-Dataset
